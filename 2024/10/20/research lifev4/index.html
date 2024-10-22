@@ -1,0 +1,58 @@
+<!DOCTYPE html><html class="appearance-auto" lang="en"><head><meta charset="UTF-8"><title>从零开始的科研生活004</title><meta name="description"><meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, initial-scale=1"><!-- Google Analytics --><!-- End Google Analytics -->
+<!-- Baidu Analytics --><!-- End Baidu Analytics --><link rel="icon" href="/images/favicon.ico"><link rel="stylesheet" href="/style/common/bulma.css"><link rel="stylesheet" href="/style/base.css"><link rel="stylesheet" href="/style/common/helper.css"><script src="/js/common.js"></script><link rel="stylesheet" href="/style/post.css"><link rel="stylesheet" href="/style/themes/highlight-theme-light.css"><link rel="stylesheet" href="/style/common/jquery.fancybox.min.css"><script src="/js/highlight.pack.js"></script><meta name="description" content="day25 2024.10.20World Model-based Perception for Visual Legged Locomotion基于Dreamer框架构建的针对四足机器人的MBRL方法。方法实现了基于视觉的。
+世界模型的更新频率小于policy决策频率，每k步更新。世界模型通过DreamerV3中RSSM的方法构建，构建思路与TWIST那篇十分相似（因为都是Dreamer）。
+
+循环模型使用GRU网络实现，解码器和编码器使用CNN网络处理深度图像实现，MLP处理本体感受观测。
+
+策略网络根据世界模型学习，经过良好训练的世界模型中的循环状态$h_t$包含了足够的信息用于未来预测，类似于底层的马尔可夫状态$s_t$。基于这一见解，训练了一个将$h_t$作为输入的策略。训练时采用actor-cr.."><meta name="generator" content="Hexo 7.3.0"><link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+</head><body class="is-flex is-flex-direction-column"><header class="header-widget is-flex-shrink-0 is-hidden-mobile"><div class="container is-fullhd is-flex is-justify-content-space-between is-align-items-center is-full-height"><section class="is-hidden-mobile is-flex-shrink-0"><h2><a href="/">FUshi37's blog</a></h2></section><h3 class="is-hidden-mobile is-family-serif is-full-height is-flex is-align-items-center is-flex-shrink-0"><div class="is-full-height" id="postTopic"><p class="is-full-height is-flex-shrink-0 is-flex is-align-items-center is-justify-content-center">从零开始的科研生活004</p><p class="is-full-height is-flex-shrink-0 is-flex is-align-items-center is-justify-content-center">Click back to the top</p></div></h3><aside class="is-flex-shrink-0"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></aside></div></header><header class="is-flex header-widget is-flex-shrink-0 is-align-items-center is-justify-content-center is-hidden-tablet"><h3 class="is-inline-block"><a href="/">Home</a></h3><h3 class="is-inline-block"><a href="/about">About</a></h3><h3 class="is-inline-block"><a href="/archives">Archives</a></h3></header><main><main class="container is-max-widescreen content section post-page pt-4 px-4"><div class="columns is-flex-desktop is-justify-content-center is-flex-direction-row-reverse"><div class="column is-3 is-hidden-mobile"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#day25-2024-10-20"><span class="toc-text">day25 2024.10.20</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#World-Model-based-Perception-for-Visual-Legged-Locomotion"><span class="toc-text">World Model-based Perception for Visual Legged Locomotion</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#day26-2024-10-21"><span class="toc-text">day26 2024.10.21</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Temporal-Difference-Learning-or-Model-Predictive-Control-2022"><span class="toc-text">Temporal Difference Learning or Model Predictive Control 2022</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#day27-2024-10-22"><span class="toc-text">day27 2024.10.22</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#GRU"><span class="toc-text">GRU</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#MPC-MPPI"><span class="toc-text">MPC -&gt; MPPI</span></a></li></ol></li></ol></li></ol></div><div class="column is-9"><header class="my-4"></header><h1 class="mt-0 mb-1 is-family-serif" id="postTitle">从零开始的科研生活004</h1><time class="has-text-grey" datetime="2024-10-20T08:15:06.253Z">2024-10-20</time><article class="mt-2 post-content"><h2 id="day25-2024-10-20"><a href="#day25-2024-10-20" class="headerlink" title="day25 2024.10.20"></a>day25 2024.10.20</h2><h3 id="World-Model-based-Perception-for-Visual-Legged-Locomotion"><a href="#World-Model-based-Perception-for-Visual-Legged-Locomotion" class="headerlink" title="World Model-based Perception for Visual Legged Locomotion"></a>World Model-based Perception for Visual Legged Locomotion</h3><p>基于Dreamer框架构建的针对四足机器人的MBRL方法。方法实现了基于视觉的。</p>
+<p>世界模型的更新频率小于policy决策频率，每k步更新。世界模型通过DreamerV3中RSSM的方法构建，构建思路与TWIST那篇十分相似（因为都是Dreamer）。</p>
+<p><img src="/2024/10/20/research%20lifev4/1729428040891.png" alt="1729428040891"></p>
+<p>循环模型使用GRU网络实现，解码器和编码器使用CNN网络处理深度图像实现，MLP处理本体感受观测。</p>
+<p><img src="/2024/10/20/research%20lifev4/1729428986904.png" alt="1729428986904"></p>
+<p>策略网络根据世界模型学习，经过良好训练的世界模型中的循环状态$h_t$包含了足够的信息用于未来预测，类似于底层的马尔可夫状态$s_t$。基于这一见解，训练了一个将$h_t$作为输入的策略。训练时采用actor-critic，critic可以使用特权信息训练。</p>
+<p>奖励函数设置</p>
+<p><img src="/2024/10/20/research%20lifev4/1729431716051.png" alt="1729431716051"></p>
+<p>PPO + Isaac Gym 有类似于课程学习的过程</p>
+<h2 id="day26-2024-10-21"><a href="#day26-2024-10-21" class="headerlink" title="day26 2024.10.21"></a>day26 2024.10.21</h2><h3 id="Temporal-Difference-Learning-or-Model-Predictive-Control-2022"><a href="#Temporal-Difference-Learning-or-Model-Predictive-Control-2022" class="headerlink" title="Temporal Difference Learning or Model Predictive Control 2022"></a>Temporal Difference Learning or Model Predictive Control 2022</h3><p>MBRL虽然比MFRL采样效率高，但是规划long horizon时需要的时间开销大，且很难获取一个准确的环境模型。TD-MPC，集合了MF和MB的优势，讲MPC和Model free的TD error更新结合，使用最终值函数来估计长期奖励。</p>
+<p>具体而言，算法用MBRL学习用于局部轨迹优化的模型，用MFRL学习预测长期回报（用于全局优化）的价值函数（value function）。</p>
+<p>在作者的MPC的pipeline中，通过输入t时刻的observation$s_t$，经过编码器$h_{\theta}$输出$t$时刻的隐向量$z_t$，将$z_t$和从正态分布采用的action$a_t$输入给环境模型$d_{theta}$，输出下一时刻的隐向量$z_{t+1}$并得到相应奖励$\hat{r}<em>t$。接着又从高斯分布中采样下一时刻的action$a</em>{t+1}$，接着如下图所示，直至预测到H时刻的隐向量$z_{H}$结束。</p>
+<p><img src="/2024/10/20/research%20lifev4/98c2b2a59e54d0fd0eab307c6b7f5182.png" alt="img"></p>
+<p>环境模型$d_{\theta}$的不精确可能会导致累计误差+MPC求得是t到H时刻的局部最优解。</p>
+<p>TD-learning for MPC</p>
+<p>TD-learning解决MPC的上述两个问题，TD-learning通过学习一个state-action value function价值函数$Q_{\theta}(s,a)$帮助MPC找到全局最优解。因为TD-learning是MF方法，所以它只学习跟奖励有关的信息，从而减少了MPC学习模型时的误差。</p>
+<p>作者直接将价值函数加到MPC预测的一条轨迹所获得的回报中来学习价值函数。</p>
+<p><img src="/2024/10/20/research%20lifev4/cfa29fdccc731714be0be6952c663ac5.png" alt="img"></p>
+<p>标红的 Value 是状态-动作价值函数$Q_{\theta}(s,a)$所获得的回报，标红的 Rewards 是MPC规划一条轨迹所获得的奖励。也就是在MPC得到的rewards基础上加上$Q_{\theta}(s,a)$所获得的价值。</p>
+<p><img src="/2024/10/20/research%20lifev4/1729576979789.png" alt="1729576979789"></p>
+<p>Can we instead augment model-based planning with the strengths of model-free learning?</p>
+<p>MPC算法用的是MPPI</p>
+<p>TD-MPC维护了一个额外的policy来guide planning，如算法伪代码中蓝色图所示。当策略很差时，就会自然被排除在top-k之外，当粗恶略比较耗时，就可以很自然的按比例影响估计的回报。为了使采样随机化，对$\pi_{\theta}$的action像DDPG中一样应用线性退火的高斯噪声。</p>
+<p><img src="/2024/10/20/research%20lifev4/1729591586033.png" alt="1729591586033"></p>
+<p>TOLD与terminal value function通过TD-learning一起学习，TOLD仅对环境中预测奖励相关的元素进行建模，而不是建立一个完整的世界模型。在推理过程中，TD-MPC用TOLD进行轨迹优化，使用模型rollouts来估计短期奖励，使用terminal value function来估计长期奖励。支持连续动作空间、任意模态输入和系数奖励。</p>
+<p>TOLD（Task-Oriented Latent Dynamics Model），能够支持图像或state的输入，主要在隐空间中模拟能够影响奖励的环境因素。主要 由五部分组成：</p>
+<p><img src="/2024/10/20/research%20lifev4/1729577718396.png" alt="1729577718396"></p>
+<p><img src="/2024/10/20/research%20lifev4/1729592401382.png" alt="1729592401382"></p>
+<p>TOLD模型完全使用deterministic MLP实现，不需要RNN门控或者是概率模型。</p>
+<p>相较于直接估计$Q$，文章选择学习一个策略$\pi_{\theta}$，该策略通过最小化目标函数来最大化$Q_{\theta}$。</p>
+<p><img src="/2024/10/20/research%20lifev4/1729594442767.png" alt="1729594442767"></p>
+<p>预期直接预测未来的状态或图片像素，文章选择预测隐向量，这也是一个很直观的思路，因为直接预测observation是十分困难的。我们建议用潜在状态一致性损失（如公式 10 所示）来正则化 TOLD，该损失迫使时间 $t + 1$ 的未来潜在状态预测 $z_{t+1} &#x3D; d_θ(z_t, a_t)$ 与对应ground-truth观察 $h_{θ^−}(s_{t+1})$ 的潜在表示相似，从而完全避免了对观察的预测。</p>
+<p><img src="/2024/10/20/research%20lifev4/1729594884840.png" alt="1729594884840"></p>
+<h2 id="day27-2024-10-22"><a href="#day27-2024-10-22" class="headerlink" title="day27 2024.10.22"></a>day27 2024.10.22</h2><h4 id="GRU"><a href="#GRU" class="headerlink" title="GRU"></a>GRU</h4><p>GRU（Gated Recurrent Unit）是一种循环神经网络（RNN）架构，专门用于处理序列数据。它在标准RNN的基础上引入了门控机制，帮助模型更有效地捕捉长程依赖关系。GRU有两个主要的门：</p>
+<ol>
+<li><strong>更新门</strong>（Update Gate）：控制当前状态的更新程度，它决定了多少先前的信息需要保留。</li>
+<li><strong>重置门</strong>（Reset Gate）：控制将多少先前的状态丢弃，它影响如何结合过去的信息。</li>
+</ol>
+<p>通过这些门，GRU能够在处理序列数据时更好地管理信息流，减少梯度消失的问题，因此在许多任务（如自然语言处理、时间序列预测等）中表现良好。相比于LSTM，GRU的结构更简单，参数更少，通常训练更快。</p>
+<h4 id="MPC-MPPI"><a href="#MPC-MPPI" class="headerlink" title="MPC -&gt; MPPI"></a>MPC -&gt; MPPI</h4><p>MPPI（Model Predictive Path Integral）</p>
+<ol>
+<li><p><strong>原理</strong>：MPPI是一种基于路径积分的控制方法，它利用随机采样的轨迹来优化控制输入。通过采样生成多条轨迹，MPPI评估这些轨迹的成本，并通过加权平均来得到控制输入。</p>
+</li>
+<li><p><strong>特点</strong>：</p>
+<p>不依赖于精确的系统模型，而是可以使用系统的黑箱模型。</p>
+<p>可以处理不确定性，通过采样和重采样策略获得更稳定的控制性能。</p>
+<p>通常在高维和复杂的环境中表现良好。</p>
+</li>
+</ol>
+<p>总结来说，MPC更强调通过模型进行优化，而MPPI则是利用随机采样的方法来获取控制策略。两者各有优劣，适用于不同的控制场景。</p>
+</article><section class="jump-container is-flex is-justify-content-space-between my-6"><!-- em is empty placeholder--><em></em><a class="button is-default" href="/2024/10/12/research%20lifev3/" title="从零开始的科研生活003"><span class="has-text-weight-semibold">Next: 从零开始的科研生活003</span><i class="iconfont icon-next ml-2 has-text-grey"></i></a></section><article class="mt-6 comment-container"><script async repo="Haojen/Claudia-theme-blog" src="https://utteranc.es/client.js" issue-term="pathname" theme="preferred-color-scheme"></script></article></div></div></main></main><footer class="is-flex is-flex-direction-column is-align-items-center is-flex-shrink-0 is-family-serif"><section class="sns-container"><a title="twitter" target="_blank" rel="noopener nofollow" href="//twitter.com//"><i class="iconfont icon-twitter"></i></a><!-- Github--><a title="github" target="_blank" rel="noopener nofollow" href="//github.com/FUshi37"><i class="iconfont icon-github"></i></a><!-- Ins--><a title="instagram" target="_blank" rel="noopener nofollow" href="//www.instagram.com//"><i class="iconfont icon-ins"></i></a><!-- RSS--><!-- 知乎--><!-- 领英--><!-- 脸书--><a title="facebook" target="_blank" rel="noopener nofollow" href="//www.facebook.com//"><i class="iconfont icon-tian7_facebook"></i></a></section><p><span>Copyright ©</span><span> FUshi37 2024</span></p><div class="is-flex is-justify-content-center is-flex-wrap-wrap"><p>Powered by Hexo &verbar;&nbsp;</p><p class="is-flex is-justify-content-center"><a title="Hexo theme author" target="_blank" rel="noopener" href="//github.com/haojen">Theme by Haojen&nbsp;</a></p><div style="margin-top: 2px"><a class="github-button" title="github-button" target="_blank" rel="noopener" href="https://github.com/haojen/hexo-theme-Claudia" data-color-scheme="no-preference: light; light: light; dark: dark;" data-show-count="true"></a></div></div><div><span></span></div></footer><script async defer src="https://buttons.github.io/buttons.js"></script><script src="/js/jquery-3.6.1.min.js"></script><script src="/js/jquery-fancybox.min.js"></script><script src="/js/img_zoom.js"></script><script src="/js/post.js"></script></body></html>
